@@ -29,11 +29,11 @@ scale_fill_discrete = scale_fill_viridis_d
 ## Problem 1 - Data
 The raw data includes date, weight of three dogs and the standard object, notes describing their locations and special occasions. My goals of report is to seperate text and weight data into two seperate csv and do data wrangling, visualization for the weight data. 
 
-When date is imported from excel, it shows at numeric value of days starting from 1899-12-30. I used the as.Date function to provide correct expression of date column. The weight of dog is given by Lbs Oz. We need to convert it into single unit for convenience of analyzing. Here I converted them into lbs weight of each dog. The resulting df contains date and lbs weight of each dog during observation. 
+When date is imported from excel, it shows at numeric value of days starting from 1899-12-30. I used the as.Date function to provide correct expression of date column. The weight of dog is given by Lbs Oz. We need to convert it into single unit for convenience of analyzing. Here I converted them into lbs weight of each dog.  
 
 For the text part, date column is a subcolumn. I imported the data and drop the first row, then rename the first column - date.
 
-```{r}
+```{r, message=FALSE}
 weight_df =
   read_excel("./data/dogweights_07may2022.xlsx", range = ("B2:F363")) %>% 
   janitor::clean_names() %>%
@@ -63,4 +63,21 @@ write.csv(weight_df,"./data/weight_df.csv", row.names = FALSE)
 write.csv(notes_df,"./data/notes_df.csv", row.names = FALSE)
 ```
 
+
+## Problem 2 -
+The resulting weight df contains date and lbs weight of each dog and the standard object during observation. There's 361 unique dates.
+```{r, results='hide'}
+weight_df %>% 
+  summarize(distinct_date = n_distinct(date))
+```
+#### number of observations, average weight and the standard deviation for each dog
+```{r}
+weight_df %>% 
+  pivot_longer(
+    raisin:gagne, 
+    names_to = "dog",
+    values_to = "weight_lbs") %>% 
+  group_by(dog) %>% 
+  summarize(n_obs = n(), mean = mean(weight_lbs, na.rm = TRUE), sd = sd(weight_lbs, na.rm = TRUE))
+```
 
