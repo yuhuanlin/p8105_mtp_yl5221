@@ -64,8 +64,8 @@ write.csv(notes_df,"./data/notes_df.csv", row.names = FALSE)
 ```
 
 
-## Problem 2 -
-The resulting weight df contains date and lbs weight of each dog and the standard object during observation. There's 361 unique dates.
+## Problem 2 - EDA
+The resulting weight df contains date and lbs weight of each dog and the standard object during observation. There are 361 unique dates.
 ```{r, results='hide'}
 weight_df %>% 
   summarize(distinct_date = n_distinct(date))
@@ -79,5 +79,41 @@ weight_df %>%
     values_to = "weight_lbs") %>% 
   group_by(dog) %>% 
   summarize(n_obs = n(), mean = mean(weight_lbs, na.rm = TRUE), sd = sd(weight_lbs, na.rm = TRUE))
+```
+
+## Problem 3 - Visualization
+
+```{r}
+distribution_plot =
+  weight_df %>%
+  pivot_longer(
+    raisin:gagne, 
+    names_to = "dog",
+    values_to = "weight_lbs") %>% 
+  ggplot(aes(x = weight_lbs, y = factor(dog), fill = stat(x))) +
+  ggridges::geom_density_ridges_gradient(scale = 3, rel_min_height = 0.01, alpha = 0.5) +
+  labs(
+    title = "Distribution of Dog's Weight",
+    x = "weight(lbs)",
+    y = "name of dog"
+  ) 
+
+time_plot =
+  weight_df %>% 
+  pivot_longer(
+    raisin:gagne, 
+    names_to = "dog",
+    values_to = "weight_lbs") %>%
+  ggplot(aes(x = date, y = weight_lbs)) +
+  geom_point(alpha = .5) + 
+  geom_smooth(se = FALSE) +
+  facet_grid(~dog) +
+  labs(
+    title = "Dog's Weight Over Time",
+    x = "year",
+    y = "weight(lbs)"
+  ) 
+
+distribution_plot + time_plot
 ```
 
