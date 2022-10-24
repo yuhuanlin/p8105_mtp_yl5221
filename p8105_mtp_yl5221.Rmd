@@ -70,7 +70,7 @@ The resulting weight df contains date and lbs weight of each dog and the standar
 weight_df %>% 
   summarize(distinct_date = n_distinct(date))
 ```
-#### number of observations, average weight and the standard deviation for each dog
+Summarizing number of observations, average weight and the standard deviation for each dog
 ```{r}
 weight_df %>% 
   pivot_longer(
@@ -83,7 +83,8 @@ weight_df %>%
 
 ## Problem 3 - Visualization
 
-```{r}
+All three dogs have peak of weight during 2018 and have a trend of decreasing weight from 2018 to 2022. Frequent moving might be a reason of decreasing weight. Gagne died in 2019 and his data stopped there. The reason of rapid drop of Gagne's weight might be health problems before death. Simone and Gagne's weights are alike. Their most frequent weights are around 11 lbs. Raisin's most frequent weight is around 17.5 lbs. For Simone, its weight dropped significantly after having neurological problem in 2021.
+```{r, message=FALSE}
 distribution_plot =
   weight_df %>%
   pivot_longer(
@@ -115,5 +116,10 @@ time_plot =
   ) 
 
 distribution_plot + time_plot
+```
+
+#### export to results folder 
+```{r}
+ggsave("twopanel_plot.png", path = "./results", width = 10)
 ```
 
