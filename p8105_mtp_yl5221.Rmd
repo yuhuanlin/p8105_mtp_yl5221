@@ -11,8 +11,9 @@ library(readxl)
 knitr::opts_chunk$set(
   fig.width = 6,
   fig.asp = .6,
-  out.width = "90%"
-)
+  out.width = "90%",
+  warning = FALSE,
+  message = FALSE)
 
 theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
@@ -27,13 +28,13 @@ scale_fill_discrete = scale_fill_viridis_d
 
 
 ## Problem 1 - Data
-The raw data includes date, weight of three dogs and the standard object, notes describing their locations and special occasions. My goals of report is to seperate text and weight data into two seperate csv and do data wrangling, visualization for the weight data. 
+The raw data includes observation date, weight of three dogs and the standard object, notes describing their locations and special occasions from 2018 to 2022. My goals of report is to separate text and weight data into two separate csv, do data wrangling, visualization for the weight data with information from the notes.
 
-When date is imported from excel, it shows at numeric value of days starting from 1899-12-30. I used the as.Date function to provide correct expression of date column. The weight of dog is given by Lbs Oz. We need to convert it into single unit for convenience of analyzing. Here I converted them into lbs weight of each dog.  
+For the weight data part, when date is imported from excel, it shows as numeric value of days starting from 1899-12-30. I used the as.Date function to provide correct expression of date column. The weight of dog is given by Lbs Oz. We need to convert it into single unit for convenience of analyzing. Here I converted the variables into numeric columns and converted them into lbs weight of each dog.  
 
-For the text part, date column is a subcolumn. I imported the data and drop the first row, then rename the first column - date.
+For the text part, date column is a sub-column under weight which can't be directly selected with the notes column. I imported the data and drop the first row, then rename the first column - date. The resulting notes_df has 361 observations of 2 variables.
 
-```{r, message=FALSE}
+```{r}
 weight_df =
   read_excel("./data/dogweights_07may2022.xlsx", range = ("B2:F363")) %>% 
   janitor::clean_names() %>%
@@ -65,12 +66,12 @@ write.csv(notes_df,"./data/notes_df.csv", row.names = FALSE)
 
 
 ## Problem 2 - EDA
-The resulting weight df contains date and lbs weight of each dog and the standard object during observation. There are 361 unique dates.
+The resulting weight df has 361 observations of 5 variables. It contains date, lbs weight of three dogs and the standard object during observation. There are 361 unique dates of observations.
 ```{r, results='hide'}
 weight_df %>% 
   summarize(distinct_date = n_distinct(date))
 ```
-Summarizing number of observations, average weight and the standard deviation for each dog
+Summarizing table for number of observations, average weight and the standard deviation for each dog
 ```{r}
 weight_df %>% 
   pivot_longer(
@@ -78,13 +79,15 @@ weight_df %>%
     names_to = "dog",
     values_to = "weight_lbs") %>% 
   group_by(dog) %>% 
-  summarize(n_obs = n(), mean = mean(weight_lbs, na.rm = TRUE), sd = sd(weight_lbs, na.rm = TRUE))
+  summarize(n_obs = n(), mean = mean(weight_lbs, na.rm = TRUE), sd = sd(weight_lbs, na.rm = TRUE)) %>% 
+  knitr::kable(caption = "Statistics of dogs", digits = 4)
 ```
 
 ## Problem 3 - Visualization
 
-All three dogs have peak of weight during 2018 and have a trend of decreasing weight from 2018 to 2022. Frequent moving might be a reason of decreasing weight. Gagne died in 2019 and his data stopped there. The reason of rapid drop of Gagne's weight might be health problems before death. Simone and Gagne's weights are alike. Their most frequent weights are around 11 lbs. Raisin's most frequent weight is around 17.5 lbs. For Simone, its weight dropped significantly after having neurological problem in 2021.
-```{r, message=FALSE}
+All three dogs have peak of weight during 2018 and have a trend of decreasing weight from 2018 to 2022. Frequent moving might be a reason of decreasing weight. Gagne died in 2019 and his data stopped there. The reason of rapid drop of Gagne's weight might be health problems before death. Simone and Gagne's weights are alike. Their most frequent weights are around 11 lbs. Raisin's most frequent weight is around 17.5 lbs. For Simone, its weight dropped significantly after having neurological problem in 2021. For Raisin, his most rapid drop of weight is during 2018 when dogs spent lots of time at Weber's.
+
+```{r}
 distribution_plot =
   weight_df %>%
   pivot_longer(
